@@ -33,16 +33,39 @@
 </template>
 
 <script>
+import {getOrderInfoById} from '../api/index.js'
+import dayjs from 'dayjs'
 export default {
     data(){
         return {
-            result:'8686RTX',
-            name:'张三',
-            age:26,
-            address:'北京市海淀区',
-            email:'1123@qq.com',
-            time:'2021-07-14'
+            result:'',
+            name:'',
+            age:'',
+            address:'',
+            email:'',
+            time:'',
         }
+    },
+    created(){
+        // 获取预约成功返回的 _id
+        let _id = window.sessionStorage.getItem('_id');
+        let  userObj = window.sessionStorage.getItem('userInfo');
+        let userInfo = JSON.parse(userObj);
+        this.name = userInfo.name;
+        this.age = userInfo.age;
+        this.address = userInfo.address;
+        this.email = userInfo.email;
+        console.log(this.name)
+        getOrderInfoById({_id}).then(data => {
+            if(data.code == 1000) {
+                // 获取预约成功时间
+                this.time = dayjs(data.msg.date).format('YYYY-MM-DD hh:mm');
+                // 获取预约码
+                this.result = data.msg.code;
+            }
+        }).catch(err => {
+            console.log(err)
+        })
     },
     methods:{
         // 再次查询事件

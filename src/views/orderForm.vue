@@ -5,8 +5,8 @@
         姓名: <input placeholder="请输入姓名" v-model="name" style="color:#000;" />
       </label>
       <label for="">
-        性别:  <input class="radio" v-model="sex" required type="radio" name="sex" style="color:#000;" value="男" />男
-              <input class="radio" v-model="sex" required type="radio" name="sex" style="color:#000;" value="女" />女
+        性别:  <input class="radio" v-model="gender" required type="radio" name="sex" style="color:#000;" value="男" />男
+              <input class="radio" v-model="gender" required type="radio" name="sex" style="color:#000;" value="女" />女
       </label>
       <label for="">
         年龄: <input placeholder="请输入年龄" type="number" v-model="age" style="color:#000;" />
@@ -27,13 +27,13 @@
 </template>
 <script>
 
-
+import {getOrder} from '../api/index.js'
 export default {
   name:'order-form',
   data() {
     return {
       name:'',
-      sex:'',
+      gender:'',
       age:'',
       email:'',
       address:'',
@@ -42,33 +42,60 @@ export default {
   },
   methods:{
     goToOrder(){
-      console.log(this.time);
+      console.log(this.gender);
       switch (true) {
         case this.name == '':
           alert('姓名不能为空');
-          break;
-        case this.sex == '':
+          return false;
+        case this.gender == '':
           alert('性别不能为空');
-          break;
-          case this.age == '':
+          return false;
+        case this.age == '':
           alert('年龄不能为空');
-          break;
-          case this.email == '':
-          alert('邮箱不能为空');
-          break;
+          return false;
         case this.address == '':
           alert('地址不能为空');
-          break;
+          return false;
+        case this.email == '':
+          alert('邮箱不能为空');
+          return false;
         case this.time == '':
           alert('时间不能为空');
-          break;
+          return false;
       }
-      // TODO 发起网络请求
       // 1.获取表单数据
-
-      this.$router.push({
-        path:'/orderCodeResult'
+      let params = {
+        name:this.name,
+        gender:this.gender,
+        age:this.age,
+        address:this.address,
+        email:this.email,
+        time:this.time
+      }
+      // 填写表单预约核酸检测
+      getOrder(params).then(
+        data => {
+          console.log(data)
+          console.log(data.status)
+          console.log(data.msg._id)
+          if(data.status == 1000){
+            // 存储 _id 
+            window.sessionStorage.setItem('_id',data.msg._id);
+            window.sessionStorage.setItem('userInfo',JSON.stringify(params));
+            
+            this.$router.push({
+              path:'/orderCodeResult'
+            })
+          }else {
+            alert('网络异常');
+          }
+        }
+      ).catch(err => {
+        console.log(err);
+        alert('网络异常');
       })
+      
+      
     },
     goBack(){
       this.$router.go(-1);
